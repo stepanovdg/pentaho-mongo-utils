@@ -1,5 +1,6 @@
 package org.pentaho.mongo.wrapper;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -8,7 +9,6 @@ import org.pentaho.mongo.MongoProp;
 import org.pentaho.mongo.MongoProperties;
 import org.pentaho.mongo.MongoUtilLogger;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.*;
 
 public class MongoClientWrapperFactoryTest {
@@ -28,9 +28,10 @@ public class MongoClientWrapperFactoryTest {
         .createMongoClientWrapper(
         new MongoProperties.Builder()
             .set( MongoProp.USERNAME, "user" )
-            .set( MongoProp.PASSWORD, "password" ).build(),
+            .set( MongoProp.PASSWORD, "password" )
+            .set( MongoProp.DBNAME, "dbname" ).build(),
         logger );
-    assertThat( wrapper, instanceOf( UsernamePasswordMongoClientWrapper.class ) );
+    assertThat( wrapper, CoreMatchers.instanceOf( UsernamePasswordMongoClientWrapper.class ) );
 
     wrapper = MongoClientWrapperFactory
         .createMongoClientWrapper(
@@ -38,6 +39,6 @@ public class MongoClientWrapperFactoryTest {
                 .set( MongoProp.USE_KERBEROS, "false" )
                 .build(),
             logger );
-    assertThat( wrapper, instanceOf( NoAuthMongoClientWrapper.class ) );
+    assertThat( wrapper, CoreMatchers.instanceOf( NoAuthMongoClientWrapper.class ) );
   }
 }

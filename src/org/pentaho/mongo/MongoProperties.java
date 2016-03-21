@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.pentaho.mongo.MongoProp.readPreference;
-
 /**
  * A container for all properties associated with a MongoClientWrapper, including
  * properties for handling credentials, server lists, and MongoClientOptions.
@@ -85,7 +83,7 @@ public class MongoProperties {
    * @return the com.mongodb.ReadPreference associated with the MongoProp.readPreference value.
    */
   public ReadPreference getReadPreference() {
-    return ReadPreference.valueOf( props.get( readPreference ) );
+    return ReadPreference.valueOf( props.get( MongoProp.readPreference ) );
   }
 
   @Override
@@ -94,13 +92,13 @@ public class MongoProperties {
     builder.append( "MongoProperties:\n" );
     List<MongoProp> propList = new ArrayList<MongoProp>( props.keySet() );
     Collections.sort( propList, new Comparator<MongoProp>() {
-          @Override public int compare( MongoProp p1, MongoProp p2 ) {
-            return Objects.compare(
-                p1 == null ? null : p1.name(),
-                p2 == null ? null : p2.name(),
-                String.CASE_INSENSITIVE_ORDER );
-          }
-        } );
+      @Override public int compare( MongoProp p1, MongoProp p2 ) {
+        return Objects.compare(
+          p1 == null ? null : p1.name(),
+          p2 == null ? null : p2.name(),
+          String.CASE_INSENSITIVE_ORDER );
+      }
+    } );
     for ( MongoProp prop : propList ) {
       builder.append( String.format( "%s=%s\n", prop.name(), props.get( prop ) ) );
     }

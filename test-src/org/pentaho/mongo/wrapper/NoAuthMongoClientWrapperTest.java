@@ -19,8 +19,11 @@ package org.pentaho.mongo.wrapper;
 
 import com.mongodb.*;
 import com.mongodb.util.JSON;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.core.IsEqual;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.matchers.JUnitMatchers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -34,10 +37,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.*;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.Mockito.*;
 
 public class NoAuthMongoClientWrapperTest {
@@ -102,7 +102,7 @@ public class NoAuthMongoClientWrapperTest {
     when( mockDB.getCollection( NoAuthMongoClientWrapper.REPL_SET_COLLECTION ) )
         .thenReturn( dbCollection );
 
-    assertThat( noAuthMongoClientWrapper.getLastErrorModes(), equalTo( Arrays.asList( "DCThree" ) ) );
+    assertThat( noAuthMongoClientWrapper.getLastErrorModes(), IsEqual.equalTo( Arrays.asList( "DCThree" ) ) );
   }
 
 
@@ -139,8 +139,8 @@ public class NoAuthMongoClientWrapperTest {
         noAuthMongoClientWrapper.getReplicaSetMembersThatSatisfyTagSets( tagSets );
     // two replica set members have the "use : production" tag in their tag sets
     assertEquals( 2, satisfy.size() );
-    assertThat( satisfy.get( 0 ), containsString( "palladium.lan:27017" ) );
-    assertThat( satisfy.get( 1 ), containsString( "palladium.local:27019" ) );
+    assertThat( satisfy.get( 0 ), JUnitMatchers.containsString( "palladium.lan:27017" ) );
+    assertThat( satisfy.get( 1 ), JUnitMatchers.containsString( "palladium.local:27019" ) );
   }
 
   @Test
@@ -150,7 +150,7 @@ public class NoAuthMongoClientWrapperTest {
       noAuthMongoClientWrapper.getReplicaSetMembersThatSatisfyTagSets( null );
       fail( "expected exception" );
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( MongoDbException.class ) );
+      assertThat( e, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
   }
 
@@ -179,7 +179,7 @@ public class NoAuthMongoClientWrapperTest {
       noAuthMongoClientWrapper.getReplicaSetMembersThatSatisfyTagSets( tagSets );
       fail( "expected exception." );
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( MongoDbException.class ) );
+      assertThat( e, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
   }
 
@@ -195,8 +195,9 @@ public class NoAuthMongoClientWrapperTest {
     verify( mongoClientFactory ).getMongoClient( serverAddresses.capture(), mongoCredentials.capture(),
         any( MongoClientOptions.class ), eq( false ) );
 
-    assertThat( serverAddresses.getValue(), equalTo( Arrays.asList( address ) ) );
-    assertThat( "No credentials should be associated w/ NoAuth", mongoCredentials.getValue().size(), equalTo( 0 ) );
+    assertThat( serverAddresses.getValue(), IsEqual.equalTo( Arrays.asList( address ) ) );
+    assertThat( "No credentials should be associated w/ NoAuth", mongoCredentials.getValue().size(),
+      IsEqual.equalTo( 0 ) );
   }
 
   @Test
@@ -212,7 +213,7 @@ public class NoAuthMongoClientWrapperTest {
         new ServerAddress( "host1", 1010 ),
         new ServerAddress( "host2", 2020 ),
         new ServerAddress( "host3", 3030 ) );
-    assertThat( serverAddresses.getValue(), equalTo( addresses ) );
+    assertThat( serverAddresses.getValue(), IsEqual.equalTo( addresses ) );
   }
 
   @Test
@@ -255,7 +256,7 @@ public class NoAuthMongoClientWrapperTest {
     new NoAuthMongoClientWrapper( mongoProperties, mockMongoUtilLogger ) {
       protected MongoClient getClient( MongoClientOptions opts ) {
         clientCalled.set( true );
-        assertThat( opts, equalTo( options ) );
+        assertThat( opts, IsEqual.equalTo( options ) );
         return null;
       } };
     verify( mongoProperties ).buildMongoClientOptions( mockMongoUtilLogger );
@@ -282,14 +283,14 @@ public class NoAuthMongoClientWrapperTest {
       noAuthMongoClientWrapper.getDatabaseNames();
       fail( "expected exception" );
     } catch ( Exception mde ) {
-      assertThat( mde, instanceOf( MongoDbException.class ) );
+      assertThat( mde, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
     doThrow( runtimeException ).when( mockMongoClient ).getDB( "foo" );
     try {
       noAuthMongoClientWrapper.getDb( "foo" );
       fail( "expected exception" );
     } catch ( Exception mde ) {
-      assertThat( mde, instanceOf( MongoDbException.class ) );
+      assertThat( mde, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
 
   }
@@ -302,7 +303,7 @@ public class NoAuthMongoClientWrapperTest {
       noAuthMongoClientWrapper.getCollectionsNames( "foo" );
       fail( "expected exception" );
     } catch ( Exception mde ) {
-      assertThat( mde, instanceOf( MongoDbException.class ) );
+      assertThat( mde, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
   }
 
@@ -318,7 +319,7 @@ public class NoAuthMongoClientWrapperTest {
     when( mockDB.getCollection( "collection" ) ).thenReturn( collection );
 
     assertThat( noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "collection" ),
-        equalTo( Arrays.asList( "indexInfo" ) ) );
+      IsEqual.equalTo( Arrays.asList( "indexInfo" ) ) );
   }
 
   @Test
@@ -332,7 +333,7 @@ public class NoAuthMongoClientWrapperTest {
     when( collection.getIndexInfo() ).thenReturn( indexInfo );
     when( mockDB.getCollection( "collection" ) ).thenReturn( collection );
     assertThat( noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "collection" ),
-        equalTo( Arrays.asList( "indexInfo" ) ) );
+      IsEqual.equalTo( Arrays.asList( "indexInfo" ) ) );
     verify( mockDB ).createCollection( "collection", null );
   }
 
@@ -343,7 +344,7 @@ public class NoAuthMongoClientWrapperTest {
       noAuthMongoClientWrapper.getIndexInfo( "fakeDb", "" );
       fail( "expected exception" );
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( MongoDbException.class ) );
+      assertThat( e, CoreMatchers.instanceOf( MongoDbException.class ) );
     }
   }
 
@@ -367,7 +368,7 @@ public class NoAuthMongoClientWrapperTest {
     } catch ( Exception e ) {
       verify( mockDB ).getCollection( "collection" );
       assertThat( e.getMessage(),
-          containsString( BaseMessages.getString( PKG,
+        JUnitMatchers.containsString( BaseMessages.getString( PKG,
               "MongoNoAuthWrapper.ErrorMessage.UnableToGetInfoForCollection",
               "collection" ) ) );
     }
@@ -382,7 +383,7 @@ public class NoAuthMongoClientWrapperTest {
     } catch ( Exception e ) {
       verify( mockDB ).getCollection( "collection" );
       assertThat( e.getMessage(),
-          containsString( BaseMessages.getString( PKG,
+        JUnitMatchers.containsString( BaseMessages.getString( PKG,
               "MongoNoAuthWrapper.ErrorMessage.UnableToGetInfoForCollection",
               "collection" ) ) );
     }
@@ -399,7 +400,7 @@ public class NoAuthMongoClientWrapperTest {
     List<String> tags = noAuthMongoClientWrapper.getAllTags();
     verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG, "MongoNoAuthWrapper.Message.Warning.LocalDBNotAvailable" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
@@ -409,7 +410,7 @@ public class NoAuthMongoClientWrapperTest {
     verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG,
             "MongoNoAuthWrapper.Message.Warning.ReplicaSetCollectionUnavailable" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
@@ -424,7 +425,7 @@ public class NoAuthMongoClientWrapperTest {
     verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG,
             "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
@@ -437,7 +438,7 @@ public class NoAuthMongoClientWrapperTest {
     verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG,
             "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
@@ -451,7 +452,7 @@ public class NoAuthMongoClientWrapperTest {
     verify( mockMongoUtilLogger ).info(
         BaseMessages.getString( PKG,
             "MongoNoAuthWrapper.Message.Warning.NoReplicaSetMembersDefined" ) );
-    assertThat( tags.size(), equalTo( 0 ) );
+    assertThat( tags.size(), IsEqual.equalTo( 0 ) );
   }
 
   @Test
@@ -459,7 +460,7 @@ public class NoAuthMongoClientWrapperTest {
     setupMockedReplSet();
     List<String> tags = noAuthMongoClientWrapper.getAllTags();
     Collections.sort( tags, String.CASE_INSENSITIVE_ORDER );
-    assertThat( tags, equalTo( Arrays
+    assertThat( tags, IsEqual.equalTo( Arrays
             .asList( "\"dc.one\" : \"primary\"",
                 "\"dc.three\" : \"slave2\"",
                 "\"dc.two\" : \"slave1\"",

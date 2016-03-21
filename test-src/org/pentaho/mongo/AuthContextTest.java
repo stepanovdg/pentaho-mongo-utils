@@ -17,13 +17,13 @@
 
 package org.pentaho.mongo;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -53,7 +53,7 @@ public class AuthContextTest {
       authContext.doAs( privExcAction );
       fail();
     } catch ( Exception e ) {
-      assertThat( e, instanceOf( PrivilegedActionException.class ) );
+      assertThat( e, CoreMatchers.instanceOf( PrivilegedActionException.class ) );
     }
     verify( privExcAction ).run();
   }

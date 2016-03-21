@@ -3,6 +3,7 @@ package org.pentaho.mongo.wrapper.collection;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -12,7 +13,6 @@ import org.pentaho.mongo.wrapper.cursor.MongoCursorWrapper;
 
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -67,11 +67,11 @@ public class DefaultMongoCollectionWrapperTest {
   }
 
   @Test public void testFindWrapsCursor() throws MongoDbException {
-    assertThat( defaultMongoCollectionWrapper.find(), instanceOf( MongoCursorWrapper.class ) );
+    assertThat( defaultMongoCollectionWrapper.find(), CoreMatchers.instanceOf( MongoCursorWrapper.class ) );
     verify( mockDBCollection ).find();
-    assertThat( defaultMongoCollectionWrapper.find( dbObject, dbObject ), instanceOf( MongoCursorWrapper.class ) );
+    assertThat( defaultMongoCollectionWrapper.find( dbObject, dbObject ), CoreMatchers.instanceOf( MongoCursorWrapper.class ) );
     verify( mockDBCollection ).find( dbObject, dbObject );
-    assertThat( defaultMongoCollectionWrapper.find( dbObject ), instanceOf( MongoCursorWrapper.class ) );
+    assertThat( defaultMongoCollectionWrapper.find( dbObject ), CoreMatchers.instanceOf( MongoCursorWrapper.class ) );
     verify( mockDBCollection ).find( dbObject );
 
   }

@@ -26,7 +26,6 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ReplicaSetStatus;
 import com.mongodb.ServerAddress;
-
 import org.pentaho.mongo.BaseMessages;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.MongoProp;
@@ -36,7 +35,6 @@ import org.pentaho.mongo.Util;
 import org.pentaho.mongo.wrapper.collection.DefaultMongoCollectionWrapper;
 import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -133,7 +131,7 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
       try {
         ServerAddress s = new ServerAddress( host, port );
         serverList.add( s );
-      } catch ( UnknownHostException u ) {
+      } catch ( Throwable u ) {
         throw new MongoDbException( u );
       }
     }
