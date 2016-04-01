@@ -84,4 +84,8 @@ public class AuthContext {
       return Subject.doAs( login.getSubject(), action );
     }
   }
+
+  public Subject getSubject() {
+    return login.getSubject();
+  }
 }

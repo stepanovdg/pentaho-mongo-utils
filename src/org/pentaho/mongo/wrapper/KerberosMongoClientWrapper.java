@@ -20,8 +20,10 @@ package org.pentaho.mongo.wrapper;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
+import org.ietf.jgss.GSSCredential;
 import org.pentaho.mongo.AuthContext;
 import org.pentaho.mongo.KerberosHelper;
+import org.pentaho.mongo.KerberosUtil;
 import org.pentaho.mongo.MongoDbException;
 import org.pentaho.mongo.MongoProp;
 import org.pentaho.mongo.MongoProperties;
@@ -29,12 +31,18 @@ import org.pentaho.mongo.MongoUtilLogger;
 import org.pentaho.mongo.wrapper.collection.KerberosMongoCollectionWrapper;
 import org.pentaho.mongo.wrapper.collection.MongoCollectionWrapper;
 
+import javax.security.auth.Subject;
+import javax.security.sasl.Sasl;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Implementation of MongoClientWrapper which uses the GSSAPI auth mechanism.
- * Should only be instantiated by MongoClientWrapperFactory.
+ * Implementation of MongoClientWrapper which uses the GSSAPI auth mechanism. Should only be instantiated by
+ * MongoClientWrapperFactory.
  */
 class KerberosMongoClientWrapper extends UsernamePasswordMongoClientWrapper {
   private final AuthContext authContext;
@@ -46,8 +54,8 @@ class KerberosMongoClientWrapper extends UsernamePasswordMongoClientWrapper {
   }
 
   KerberosMongoClientWrapper( MongoClient client,
-                                     MongoUtilLogger log,
-                                     String username, AuthContext authContext ) {
+                              MongoUtilLogger log,
+                              String username, AuthContext authContext ) {
     super( client, log, username );
     this.authContext = authContext;
   }
@@ -55,15 +63,37 @@ class KerberosMongoClientWrapper extends UsernamePasswordMongoClientWrapper {
   @Override
   public List<MongoCredential> getCredentialList() {
     List<MongoCredential> credList = new ArrayList<MongoCredential>();
-    credList.add( MongoCredential.createGSSAPICredential(
-      props.get( MongoProp.USERNAME ) ) );
+    final String username = props.get( MongoProp.USERNAME );
+    Map<String, Object> saslProperties = new HashMap<String, Object>();
+    Subject subject = null;
+    try {
+      subject = KerberosHelper.login( username, props ).getSubject();
+      GSSCredential credential =
+        Subject.doAs( subject, new PrivilegedExceptionAction<GSSCredential>() {
+          @Override public GSSCredential run() throws Exception {
+            return KerberosUtil.getGSSCredential( username );
+          }
+        } );
+      saslProperties.put( Sasl.CREDENTIALS, credential );
+    } catch ( PrivilegedActionException e ) {
+      throw new RuntimeException(
+        "Unable to create GSSCredential for the user = " + username + " using subject = " + subject,
+        e.getException() );
+    } catch ( MongoDbException e ) {
+      throw new RuntimeException(
+        "Unable to create GSSCredential for the user = " + username, e );
+    }
+    credList.add( MongoCredential.createGSSAPICredential( username )
+      .withMechanismProperty( MongoCredential.JAVA_SUBJECT_KEY, subject )
+      .withMechanismProperty( MongoCredential.JAVA_SASL_CLIENT_PROPERTIES_KEY, saslProperties )
+    );
     return credList;
   }
 
   @Override
   protected MongoCollectionWrapper wrap( DBCollection collection ) {
     return KerberosInvocationHandler.wrap( MongoCollectionWrapper.class, authContext,
-        new KerberosMongoCollectionWrapper( collection, authContext ) );
+      new KerberosMongoCollectionWrapper( collection, authContext ) );
   }
 
   public AuthContext getAuthContext() {

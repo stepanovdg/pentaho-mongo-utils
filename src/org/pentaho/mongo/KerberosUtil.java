@@ -29,6 +29,11 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import com.sun.security.auth.module.Krb5LoginModule;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 import org.pentaho.mongo.wrapper.MongoClientWrapper;
 
 /**
@@ -40,6 +45,9 @@ import org.pentaho.mongo.wrapper.MongoClientWrapper;
  * @author Jordan Ganoff <jganoff@pentaho.com>
  */
 public class KerberosUtil {
+
+  public static final String GSSAPI_OID = "1.2.840.113554.1.2.2";
+
   /**
    * The application name to use when creating login contexts.
    */
@@ -244,4 +252,13 @@ public class KerberosUtil {
     Subject subject = new Subject();
     return new LoginContext( KERBEROS_APP_NAME, subject, null, new PentahoLoginConfiguration( configEntries ) );
   }
+
+  public static GSSCredential getGSSCredential( final String userName ) throws GSSException {
+    Oid krb5Mechanism = new Oid( KerberosUtil.GSSAPI_OID );
+    GSSManager manager = GSSManager.getInstance();
+    GSSName name = manager.createName( userName, GSSName.NT_USER_NAME );
+    return manager
+      .createCredential( name, GSSCredential.INDEFINITE_LIFETIME, krb5Mechanism, GSSCredential.INITIATE_ONLY );
+  }
+
 }
