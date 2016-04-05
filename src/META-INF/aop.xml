@@ -1,0 +1,7 @@
+<aspectj>
+    <weaver options="-showWeaveInfo">
+    </weaver>
+  <aspects>
+    <aspect name="com.mongodb.connection.ThreadSubjectAspect"/>
+  </aspects>
+</aspectj>

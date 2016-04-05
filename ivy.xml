@@ -15,6 +15,9 @@
   </publications>
   <dependencies defaultconf="default->default">
     <dependency org="org.mongodb" name="mongo-java-driver" rev="${dependency.mongo-driver.revision}" transitive="false" conf="default->default" changing="false" />
+    <dependency org="org.aspectj" name="aspectjrt" rev="1.8.9" transitive="false" conf="default->default" changing="false" />
+    <dependency org="org.aspectj" name="aspectjweaver" rev="1.8.9" transitive="false" conf="default->default" changing="false" />
+    <dependency org="org.aspectj" name="aspectjtools" rev="1.8.9" transitive="false" conf="default->default" changing="false" />
     <!-- Test Dependencies -->
     <dependency org="junit" name="junit" rev="4.4" conf="test->default" />
     <dependency org="org.mockito" name="mockito-all" rev="1.8.5" conf="test->default" />
