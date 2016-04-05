@@ -54,7 +54,7 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
   public static final String REPL_SET_LAST_ERROR_MODES = "getLastErrorModes"; //$NON-NLS-1$
   public static final String REPL_SET_MEMBERS = "members"; //$NON-NLS-1$
 
-  static MongoClientFactory clientFactory = new MongoClientFactory();
+  static MongoClientFactory clientFactory = new DefaultMongoClientFactory();
 
   private final MongoClient mongo;
   private final MongoUtilLogger log;
@@ -151,9 +151,9 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
           MongoClientWrapper.class,
           "MongoNoAuthWrapper.Message.Error.NoHostSet" ) );
     }
-    return clientFactory
-        .getMongoClient( serverAddressList, credList, opts,
-            props.useAllReplicaSetMembers() );
+    return getClientFactory( props )
+      .getMongoClient( serverAddressList, credList, opts,
+        props.useAllReplicaSetMembers() );
   }
 
 
@@ -499,5 +499,9 @@ class NoAuthMongoClientWrapper implements MongoClientWrapper {
   @Override
   public <ReturnType> ReturnType perform( String db, MongoDBAction<ReturnType> action ) throws MongoDbException {
     return action.perform( getDb( db ) );
+  }
+
+  public MongoClientFactory getClientFactory( MongoProperties opts ) {
+    return clientFactory;
   }
 }

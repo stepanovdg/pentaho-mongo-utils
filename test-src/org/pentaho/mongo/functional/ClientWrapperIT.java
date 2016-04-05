@@ -173,7 +173,7 @@ public class ClientWrapperIT extends TestBase {
       // if either the property is set to TRUE, or more than one HOST specified.
       fail( "Could not retrieve replica set status with properties:  " + props );
     }
-    final ServerAddress primary = status.getMaster();
+
     final MongoCursorWrapper cursor = wrapper.getCollection( props.get( MongoProp.DBNAME ), "sales" ).find();
 
     cursor.next();
@@ -181,10 +181,10 @@ public class ClientWrapperIT extends TestBase {
 
     if ( props.getReadPreference() == ReadPreference.primary() ) {
       assertTrue( "Using primary read preference, but cursor reading from non-primary. \n" + props,
-        primary.equals( readServer ) );
+        wrapper.getReplicaSetStatus().getMaster().equals( readServer ) );
     } else if ( props.getReadPreference() == ReadPreference.secondary() ) {
 
-      validateSecondary( wrapper, primary, readServer );
+      validateSecondary( wrapper, wrapper.getReplicaSetStatus().getMaster(), readServer );
 
     }
     wrapper.dispose();

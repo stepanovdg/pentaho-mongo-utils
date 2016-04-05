@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 
 public class MongoClientWrapperFactoryTest {
 
-  @Mock MongoClientFactory mongoClientFactory;
+  @Mock DefaultMongoClientFactory mongoClientFactory;
   @Mock MongoUtilLogger logger;
 
   @Before
